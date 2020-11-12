@@ -1,5 +1,6 @@
 declare let Settings: any;
 declare let Game: any;
+declare let $: any;
 type PointCountStr = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8';
 type PointCount = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 interface Point {
@@ -252,7 +253,7 @@ function verificate1(data: recu1Data): boolean {
             return false;
         }
     }
-    console.log('节点已完成');
+    // console.log('节点已完成');
 
     //并查集 判断节点是否全连通
     const set = Array.from(new Array(points.length).keys());
@@ -273,10 +274,10 @@ function verificate1(data: recu1Data): boolean {
     return counts === 1;
 }
 function solution1(): string {
-    // const taskKey: string = Settings.get(Game.getSaveIdent());
-    const taskKey: string = '3e2g2c5a4g3c6a4g3a2a4a4'; //test
-    // const task: Point[] = Game.task;
-    const task: Point[] = [{ "index": 0, "number": "2", "row": 0, "col": 0 }, { "index": 1, "number": "3", "row": 0, "col": 6 }, { "index": 2, "number": "3", "row": 1, "col": 1 }, { "index": 3, "number": "4", "row": 1, "col": 3 }, { "index": 4, "number": "3", "row": 1, "col": 5 }, { "index": 5, "number": "2", "row": 3, "col": 1 }, { "index": 6, "number": "1", "row": 3, "col": 4 }, { "index": 7, "number": "3", "row": 5, "col": 0 }, { "index": 8, "number": "3", "row": 5, "col": 5 }, { "index": 9, "number": "1", "row": 6, "col": 2 }, { "index": 10, "number": "3", "row": 6, "col": 6 }]; //test
+    const taskKey: string = Settings.get(Game.getSaveIdent());
+    // const taskKey: string = '3e2g2c5a4g3c6a4g3a2a4a4'; //test
+    const task: Point[] = Game.task;
+    // const task: Point[] = [{ "index": 0, "number": "2", "row": 0, "col": 0 }, { "index": 1, "number": "3", "row": 0, "col": 6 }, { "index": 2, "number": "3", "row": 1, "col": 1 }, { "index": 3, "number": "4", "row": 1, "col": 3 }, { "index": 4, "number": "3", "row": 1, "col": 5 }, { "index": 5, "number": "2", "row": 3, "col": 1 }, { "index": 6, "number": "1", "row": 3, "col": 4 }, { "index": 7, "number": "3", "row": 5, "col": 0 }, { "index": 8, "number": "3", "row": 5, "col": 5 }, { "index": 9, "number": "1", "row": 6, "col": 2 }, { "index": 10, "number": "3", "row": 6, "col": 6 }]; //test
     const nearestPointMap = initNearestPoints(task);
     console.log('nearestPointMap', nearestPointMap);
     const result = recu1({
@@ -286,11 +287,20 @@ function solution1(): string {
         selectedBridge: new Map(),
         currentPointStatus: Array(task.length).fill(0),
     });
-    console.log('result', result);
+    console.log('result', result, result && JSON.stringify([...result.selectedBridge.entries()]));
     return result ? generaterAnawer1(result) : '';
 }
 function generaterAnawer1(data: recu1Data): string {
-    return 'todo';
+    const { selectedBridge } = data;
+    return [...selectedBridge.values()]
+        .sort((a, b) => (
+            a.p.index == b.p.index ? (
+                a.q.index == b.q.index ? 0
+                    : a.q.index < b.q.index ? -1 : 1
+            ) : (a.p.index < b.p.index ? -1 : 1)
+        ))
+        .map(b => `${b.p.col},${b.p.row},${b.q.col},${b.q.row},${b.count}`)
+        .join(';');
 }
 (() => {
     const timer = new Date;
@@ -298,6 +308,13 @@ function generaterAnawer1(data: recu1Data): string {
     const timer2 = new Date;
     console.log('answer1', answer1);
     console.log('耗时', timer2.valueOf() - timer.valueOf(), 'ms');
+
+    $('#puzzleForm').attr('onsubmit', `console.log('customer onsubmit');
+        Game.saveState();
+        Game.tickTimer();
+        this.jstimerPersonal.value = Game.getTimer();
+        this.ansH.value = '${answer1}';`);
+    document.querySelector('#btnReady').click();
 })();
 
 

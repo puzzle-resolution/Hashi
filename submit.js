@@ -32,7 +32,7 @@
 
 
 (() => {
-    const answer = '3,1,5,1,2';
+    const answer = '0,0,0,4,2;3,0,6,0,2;6,0,6,2,1;1,2,6,2,1;6,2,6,4,2;0,4,6,4,2;0,4,0,6,1;0,6,2,6,2;2,6,5,6,2';
     $('#puzzleForm').attr('onsubmit', `console.log('customer onsubmit');
         Game.saveState();
         Game.tickTimer();
