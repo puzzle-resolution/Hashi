@@ -1,6 +1,9 @@
 declare let Settings: any;
 declare let Game: any;
 declare let $: any;
+interface Window {
+    submit: any;
+}
 type PointCountStr = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8';
 type PointCount = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 interface Point {
@@ -20,6 +23,26 @@ interface Bridge {
     count: BridgeCount;
 }
 
+function parseTask(key: string, puzzleWidth: number) {
+    const rowFromIndex = function (t: number) {
+        return Math.floor(t / puzzleWidth);
+    };
+    const colFromIndex = function (t: number) {
+        return t % puzzleWidth;
+    };
+    const decodeChar = function (e: string) {
+        return e.charCodeAt(0) - 96;
+    };
+    let task = [];
+    for (var e = 0, i = 0; i < key.length; i++) '0' <= key[i] && key[i] <= '9' ? (task.push({
+        index: task.length,
+        number: key[i],
+        row: rowFromIndex(e),
+        col: colFromIndex(e)
+    }), e++) : e += decodeChar(key[i]);
+    // console.log('parse task result', task, JSON.stringify(task));
+    return task;
+}
 // function getPointMapKey(): undefined;
 // function getPointMapKey(p: { row: number, col: number }): string;
 // function getPointMapKey(p?: { row: number, col: number }) {
@@ -86,7 +109,8 @@ function intersection(l1: Bridge, l2: Bridge): boolean { //计算几何，判断
     //跨立实验
     // let h, i, j, k;
     const h = cross(a, b, c);
-    const i = cross(b, a, d);
+    // const i = cross(b, a, d);//cross(a, b, d);
+    const i = cross(a, b, d);
     const j = cross(d, c, a);
     const k = cross(d, c, b);
     return h * i < 0 && j * k < 0;
@@ -186,16 +210,32 @@ function getBridgeCases(avaliableBridges: ReturnType<typeof getAvaliableBridge>,
     const [bottom, right] = avaliableBridges;
     return cases.map(c => (
         ({
-            [1]: [undefined, right && newBridge(right.p, right.q, 1)],
-            [2]: [undefined, right && newBridge(right.p, right.q, 2)],
-            [3]: [bottom && newBridge(bottom.p, bottom.q, 1), undefined],
-            [4]: [bottom && newBridge(bottom.p, bottom.q, 1), right && newBridge(right.p, right.q, 1)],
-            [5]: [bottom && newBridge(bottom.p, bottom.q, 1), right && newBridge(right.p, right.q, 2)],
-            [6]: [bottom && newBridge(bottom.p, bottom.q, 2), undefined],
-            [7]: [bottom && newBridge(bottom.p, bottom.q, 2), right && newBridge(right.p, right.q, 1)],
-            [8]: [bottom && newBridge(bottom.p, bottom.q, 2), right && newBridge(right.p, right.q, 2)],
+            [1]: right && right.count >= 1
+                ? [undefined, right && newBridge(right.p, right.q, 1)]
+                : [undefined, undefined],
+            [2]: right && right.count >= 2
+                ? [undefined, right && newBridge(right.p, right.q, 2)]
+                : [undefined, undefined],
+            [3]: bottom && bottom.count >= 1
+                ? [bottom && newBridge(bottom.p, bottom.q, 1), undefined]
+                : [undefined, undefined],
+            [4]: bottom && bottom.count >= 1 && right && right.count >= 1
+                ? [bottom && newBridge(bottom.p, bottom.q, 1), right && newBridge(right.p, right.q, 1)]
+                : [undefined, undefined],
+            [5]: bottom && bottom.count >= 1 && right && right.count >= 2
+                ? [bottom && newBridge(bottom.p, bottom.q, 1), right && newBridge(right.p, right.q, 2)]
+                : [undefined, undefined],
+            [6]: bottom && bottom.count >= 2
+                ? [bottom && newBridge(bottom.p, bottom.q, 2), undefined]
+                : [undefined, undefined],
+            [7]: bottom && bottom.count >= 2 && right && right.count >= 1
+                ? [bottom && newBridge(bottom.p, bottom.q, 2), right && newBridge(right.p, right.q, 1)]
+                : [undefined, undefined],
+            [8]: bottom && bottom.count >= 2 && right && right.count >= 2
+                ? [bottom && newBridge(bottom.p, bottom.q, 2), right && newBridge(right.p, right.q, 2)]
+                : [undefined, undefined],
         } as { [key in 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8]: [Bridge | undefined, Bridge | undefined] })[c]
-    ));
+    )).filter(c => !(c[0] === undefined && c[1] === undefined));
 }
 let c = 0;
 function recu1(data: recu1Data): recu1Data | false { //递归所有节点
@@ -215,7 +255,9 @@ function recu1(data: recu1Data): recu1Data | false { //递归所有节点
     const avaliableBridges = getAvaliableBridge(data);
     // console.log('avaliableBridges', avaliableBridges);
     if (avaliableBridges[0] === undefined && avaliableBridges[1] === undefined) {
-        return recu1({ points, nearestPointMap, currentPointIndex: currentPointIndex + 1, selectedBridge: new Map(selectedBridge), currentPointStatus: [...currentPointStatus] });
+        if (+point.number == currentPointStatus[currentPointIndex]) {
+            return recu1({ points, nearestPointMap, currentPointIndex: currentPointIndex + 1, selectedBridge: new Map(selectedBridge), currentPointStatus: [...currentPointStatus] });
+        } else { return false } //若无可用边，但节点count未完成，则返回失败
     } else {
         const p_status = currentPointStatus[currentPointIndex];
         const p_rest_count = +point.number - p_status as PointCount;
@@ -274,9 +316,11 @@ function verificate1(data: recu1Data): boolean {
     return counts === 1;
 }
 function solution1(): string {
-    const taskKey: string = Settings.get(Game.getSaveIdent());
-    // const taskKey: string = '3e2g2c5a4g3c6a4g3a2a4a4'; //test
-    const task: Point[] = Game.task;
+    // const taskKey: string = Settings.get(Game.getSaveIdent());
+    // const task: Point[] = Game.task;
+    const taskKey: string = 'f21b2a1h3b3b5h1d33d2a'; //test
+    const task: Point[] = parseTask(taskKey, 7) as Point[]; //test
+    console.log('task', taskKey, task);
     // const task: Point[] = [{ "index": 0, "number": "2", "row": 0, "col": 0 }, { "index": 1, "number": "3", "row": 0, "col": 6 }, { "index": 2, "number": "3", "row": 1, "col": 1 }, { "index": 3, "number": "4", "row": 1, "col": 3 }, { "index": 4, "number": "3", "row": 1, "col": 5 }, { "index": 5, "number": "2", "row": 3, "col": 1 }, { "index": 6, "number": "1", "row": 3, "col": 4 }, { "index": 7, "number": "3", "row": 5, "col": 0 }, { "index": 8, "number": "3", "row": 5, "col": 5 }, { "index": 9, "number": "1", "row": 6, "col": 2 }, { "index": 10, "number": "3", "row": 6, "col": 6 }]; //test
     const nearestPointMap = initNearestPoints(task);
     console.log('nearestPointMap', nearestPointMap);
@@ -309,12 +353,14 @@ function generaterAnawer1(data: recu1Data): string {
     console.log('answer1', answer1);
     console.log('耗时', timer2.valueOf() - timer.valueOf(), 'ms');
 
-    $('#puzzleForm').attr('onsubmit', `console.log('customer onsubmit');
+    try {
+        $('#puzzleForm').attr('onsubmit', `console.log('customer onsubmit');
         Game.saveState();
         Game.tickTimer();
         this.jstimerPersonal.value = Game.getTimer();
         this.ansH.value = '${answer1}';`);
-    document.querySelector('#btnReady').click();
+        window.submit = () => (document.querySelector('#btnReady') as HTMLButtonElement | undefined)?.click();
+    } catch (err) { };
 })();
 
 

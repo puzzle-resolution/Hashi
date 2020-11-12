@@ -8,7 +8,7 @@
             "name": "launch",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/tasks.js",
+            "program": "${workspaceRoot}/dist/tasks.js",
             "args": [],
             "cwd": "${workspaceRoot}",
             "protocol": "inspector"

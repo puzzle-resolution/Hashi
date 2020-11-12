@@ -2,7 +2,9 @@
     "compilerOptions": {
         "strict": true,
         "target": "ES2015",
+        "outDir": "dist",
         "module": "esnext",
+        "moduleResolution": "node",
         "lib": [
             "es2015",
             "es2016",
@@ -13,6 +15,7 @@
             "dom"
         ],
         "downlevelIteration": true,
+        "allowSyntheticDefaultImports": true,
         "sourceMap": true,
     },
     "exclude": [
