@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
         "strict": true,
-        "target": "ES2015",
+        "target": "ES6",
         "outDir": "dist",
-        "module": "esnext",
+        "outFile": "dist/dashi.js",
+        "module": "amd",
         "moduleResolution": "node",
         "lib": [
             "es2015",
@@ -12,13 +13,19 @@
             "es2018",
             "es2019",
             "esnext",
-            "dom"
+            "dom",
+            "dom.iterable",
         ],
         "downlevelIteration": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
+        "typeRoots": [
+            "node_modules/@types",
+            "src/types",
+        ]
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "*/*.test.ts",
     ]
 }
