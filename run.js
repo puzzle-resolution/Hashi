@@ -1,4 +1,4 @@
 //work with require js
-//copy dashi.js and insert code above
+//copy Hashi.js and insert code above
 
-require(["dashi"], function (Dashi) { });
+require(["Hashi"], function (Hashi) { });

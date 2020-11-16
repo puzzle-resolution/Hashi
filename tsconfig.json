@@ -3,7 +3,7 @@
         "strict": true,
         "target": "ES6",
         "outDir": "dist",
-        "outFile": "dist/dashi.js",
+        "outFile": "dist/Hashi.js",
         "module": "amd",
         "moduleResolution": "node",
         "lib": [

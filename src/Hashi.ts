@@ -1,13 +1,13 @@
 import parseTask from './parsetask';
 import { replaceAnswer, submitAnswer } from './submit';
-import { intersection } from './utils/algorithm';
+import { intersection, cross } from './utils/algorithm';
 
 const mockTask = false; //mock调试模式
 const mockData = {
     taskKey: "f21b2a1h3b3b5h1d33d2a",
 };
 
-export default class Dashi {
+export default class Hashi {
     puzzleWidth: number;
     points: Point[];
     nearestPointMap: { [x: string]: Partial<{ bottom: number; right: number; }> };
@@ -95,7 +95,7 @@ export default class Dashi {
         }
         return res;
     }
-    getBridgeCases(avaliableBridges: ReturnType<typeof Dashi.prototype.getAvaliableBridge>, restCount: PointCount): [Bridge | undefined, Bridge | undefined][] { //基于(可用边,节点剩余count)，生成当前节点的边方案
+    getBridgeCases(avaliableBridges: ReturnType<typeof Hashi.prototype.getAvaliableBridge>, restCount: PointCount): [Bridge | undefined, Bridge | undefined][] { //基于(可用边,节点剩余count)，生成当前节点的边方案
         const cases = {         //只考虑bottom和right的位置
             [0]: [],            //最多有8种情况
             [1]: [1, 3],        //1. bottom0+right1
@@ -236,6 +236,18 @@ export default class Dashi {
     }
 }
 
+function registerWorkerWithBlob(config: {
+    scriptStr: string,
+    postMessageStr: string;
+    onMessage: (this: Worker, ev: MessageEvent<any>) => any,
+}) {
+    const { scriptStr, postMessageStr, onMessage } = config;
+    const blob = new Blob([scriptStr], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    const worker = new Worker(url);
+    worker.onmessage = onMessage;
+    worker.postMessage(postMessageStr);
+}
 
 (() => {
     const puzzleWidth = ({
@@ -249,16 +261,42 @@ export default class Dashi {
     const tasks: Point[] = (mockTask ? parseTask(taskKey, puzzleWidth) as Point[] : Game.task);
     console.log('task', taskKey, tasks);
 
-    const dashi = new Dashi(tasks, puzzleWidth);
-
+    const onmessage = (e: MessageEvent<string>) => {
+        const tasks = JSON.parse(e.data);
+        const puzzleWidth = ({
+            0: 7, 1: 7, 2: 7,
+            3: 10, 4: 10, 5: 10,
+            6: 15, 7: 15, 8: 15,
+            9: 25, 10: 25, 11: 25,
+            13: 30, 12: 30, 14: 40,
+        } as { [key in number]: number })[+Object.fromEntries([...new URL(location.href).searchParams]).size || 0];
+        const hashi = new Hashi(tasks, puzzleWidth);
+        const answer = hashi.solve();
+        (postMessage as any)(answer);
+    }
+    //此处采用hack写法，TODO 采用rollup/webpack打包
+    const scriptStr = `
+        algorithm_1={};
+        cross=${cross.toString()}
+        algorithm_1.intersection=${intersection.toString()} 
+        ${Hashi.toString()} 
+        onmessage=${onmessage.toString()}
+    `;
+    // console.log('script', scriptStr);
     const timer1 = new Date;
-    const answer = dashi.solve();
-    const timer2 = new Date;
-    console.log('answer', answer);
-    console.log('耗时', timer2.valueOf() - timer1.valueOf(), 'ms');
+    registerWorkerWithBlob({
+        scriptStr,
+        postMessageStr: JSON.stringify(tasks),
+        onMessage: (e: MessageEvent<string>) => {
+            const timer2 = new Date;
+            const answer = e.data;
+            console.log('answer', answer);
+            console.log('耗时', timer2.valueOf() - timer1.valueOf(), 'ms');
 
-    replaceAnswer(answer);
-    window.submit = submitAnswer;
+            replaceAnswer(answer);
+            window.submit = submitAnswer;
+        }
+    });
 })();
 
 
