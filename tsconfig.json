@@ -3,8 +3,8 @@
         "strict": true,
         "target": "ES6",
         "outDir": "dist",
-        "outFile": "dist/Hashi.js",
-        "module": "amd",
+        // "outFile": "dist/Hashi.js",
+        "module": "ES2015",
         "moduleResolution": "node",
         "lib": [
             "es2015",
@@ -27,5 +27,6 @@
     "exclude": [
         "node_modules",
         "*/*.test.ts",
+        "*.config.ts",
     ]
 }

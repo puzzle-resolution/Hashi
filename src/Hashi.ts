@@ -274,15 +274,13 @@ function registerWorkerWithBlob(config: {
         const answer = hashi.solve();
         (postMessage as any)(answer);
     }
-    //此处采用hack写法，TODO 采用rollup/webpack打包
+    //此处采用hack写法，需要写进所有依赖函数
     const scriptStr = `
-        algorithm_1={};
         cross=${cross.toString()}
-        algorithm_1.intersection=${intersection.toString()} 
+        intersection=${intersection.toString()} 
         ${Hashi.toString()} 
         onmessage=${onmessage.toString()}
     `;
-    // console.log('script', scriptStr);
     const timer1 = new Date;
     registerWorkerWithBlob({
         scriptStr,

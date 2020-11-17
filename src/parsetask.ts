@@ -1,4 +1,3 @@
-// import $ from 'jquery';
 
 function parseTask(key: string, puzzleWidth: number) {
     const rowFromIndex = function (t: number) {

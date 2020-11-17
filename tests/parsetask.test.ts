@@ -1,11 +1,7 @@
-// const parseTask = require('./parsetask');
+
 import parseTask from '../src/parsetask';
 
 describe('partask test', () => {
-    // beforeAll(() => {
-    //     $ = require('jquery');
-    // })
-
     const data: [[string, number], ({ index: number; number: string; row: number; col: number; }[])][] = [
         [["4a5a4a3g3c2h24a6b4h4a5b4a", 7], [{ "index": 0, "number": "4", "row": 0, "col": 0 }, { "index": 1, "number": "5", "row": 0, "col": 2 }, { "index": 2, "number": "4", "row": 0, "col": 4 }, { "index": 3, "number": "3", "row": 0, "col": 6 }, { "index": 4, "number": "3", "row": 2, "col": 0 }, { "index": 5, "number": "2", "row": 2, "col": 4 }, { "index": 6, "number": "2", "row": 3, "col": 6 }, { "index": 7, "number": "4", "row": 4, "col": 0 }, { "index": 8, "number": "6", "row": 4, "col": 2 }, { "index": 9, "number": "4", "row": 4, "col": 5 }, { "index": 10, "number": "4", "row": 6, "col": 0 }, { "index": 11, "number": "5", "row": 6, "col": 2 }, { "index": 12, "number": "4", "row": 6, "col": 5 }]],
         [["2e2g3a2b1b4d5g1a1a2a3a4c2a", 7], [{ "index": 0, "number": "2", "row": 0, "col": 0 }, { "index": 1, "number": "2", "row": 0, "col": 6 }, { "index": 2, "number": "3", "row": 2, "col": 0 }, { "index": 3, "number": "2", "row": 2, "col": 2 }, { "index": 4, "number": "1", "row": 2, "col": 5 }, { "index": 5, "number": "4", "row": 3, "col": 1 }, { "index": 6, "number": "5", "row": 3, "col": 6 }, { "index": 7, "number": "1", "row": 5, "col": 0 }, { "index": 8, "number": "1", "row": 5, "col": 2 }, { "index": 9, "number": "2", "row": 5, "col": 4 }, { "index": 10, "number": "3", "row": 5, "col": 6 }, { "index": 11, "number": "4", "row": 6, "col": 1 }, { "index": 12, "number": "2", "row": 6, "col": 5 }]],
