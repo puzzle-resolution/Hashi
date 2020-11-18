@@ -8,13 +8,11 @@ const mockData = {
 };
 
 export default class Hashi {
-    puzzleWidth: number;
     points: Point[];
     nearestPointMap: { [x: string]: Partial<{ bottom: number; right: number; }> };
     answer?: string;
-    constructor(points: Point[], puzzleWidth: number) {
+    constructor(points: Point[]) {
         this.points = points;
-        this.puzzleWidth = puzzleWidth;
         this.nearestPointMap = this.initNearestPoints(this.points);
     }
 
@@ -263,14 +261,7 @@ function registerWorkerWithBlob(config: {
 
     const onmessage = (e: MessageEvent<string>) => {
         const tasks = JSON.parse(e.data);
-        const puzzleWidth = ({
-            0: 7, 1: 7, 2: 7,
-            3: 10, 4: 10, 5: 10,
-            6: 15, 7: 15, 8: 15,
-            9: 25, 10: 25, 11: 25,
-            13: 30, 12: 30, 14: 40,
-        } as { [key in number]: number })[+Object.fromEntries([...new URL(location.href).searchParams]).size || 0];
-        const hashi = new Hashi(tasks, puzzleWidth);
+        const hashi = new Hashi(tasks);
         const answer = hashi.solve();
         (postMessage as any)(answer);
     }
